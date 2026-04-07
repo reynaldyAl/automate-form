@@ -35,6 +35,10 @@ class GoogleFormFiller:
         print(f"Opening form: {self.form_url}")
         self.driver.get(self.form_url)
         time.sleep(2)
+
+    def reset_form(self):
+        """Reload the form to the first page."""
+        self.open_form()
     
     def fill_demographics(self, demographics: dict) -> bool:
         try:

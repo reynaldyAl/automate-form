@@ -1,8 +1,10 @@
 import time
+import os
 from config import FORM_URL, CSV_FILE, NUM_SUBMISSIONS, BROWSER_HEADLESS, DRY_RUN
 from utils import load_student_names, get_demographic_for_name, assign_cohort_distribution
 from data_generator import generate_all_responses
 from form_filler import GoogleFormFiller
+from result_analyzer import ResultAnalyzer
 
 def main():
     print("=" * 60)
@@ -35,6 +37,9 @@ def main():
     print(f"Submissions to complete: {len(student_names)}")
     print("=" * 60)
     
+    # Initialize analyzer
+    analyzer = ResultAnalyzer()
+    
     filler = GoogleFormFiller(FORM_URL, headless=BROWSER_HEADLESS)
     filler.setup_driver()
     filler.open_form()
@@ -55,11 +60,14 @@ def main():
         # Fill the form
         if filler.fill_complete_survey(demographics, responses):
             successful += 1
+            analyzer.add_result(demographics, responses, status="success")
         else:
             failed += 1
+            analyzer.add_result(demographics, responses, status="failed")
         
         # Small delay between submissions
         if idx < len(student_names):
+            filler.reset_form()
             print("  → Waiting before next submission...")
             time.sleep(3)
     
@@ -72,6 +80,10 @@ def main():
     print(f"Failed: {failed}")
     print(f"Success Rate: {(successful/len(student_names)*100):.1f}%")
     print("=" * 60)
+    
+    # Analysis and export
+    analyzer.export_csv()
+    analyzer.print_summary()
     
     filler.close()
     print("\n✓ Form filler automation completed!")

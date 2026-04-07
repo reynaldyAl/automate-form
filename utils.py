@@ -2,6 +2,15 @@ import random
 import pandas as pd
 from config import PROGRAMS
 
+MALE_PREFIXES = [
+    "MOH", "MOH.", "MUH", "MUH.", "MOHAMAD", "MOHAMMAD", "AHMAD",
+    "I PUTU", "PUTU", "I GEDE", "GEDE", "I KOMANG", "KOMANG", "I KETUT", "KETUT"
+]
+
+FEMALE_PREFIXES = [
+    "NI ", "NI LUH", "SITI", "SRI", "DWI", "TRI", "NURUL", "NUR "
+]
+
 # Indonesian feminine name patterns (last names/parts that indicate female)
 FEMININE_INDICATORS = [
     'I', 'IA', 'INI', 'INA', 'AH', 'AH', 'ITI', 'IYA',
@@ -22,6 +31,20 @@ def detect_gender_from_name(name: str) -> str:
     """
     name = name.upper().strip()
     
+    # Strong prefix/token checks first
+    first_tokens = " ".join(name.split()[:2])
+    first_token = name.split()[0] if name.split() else ""
+
+    if any(first_tokens.startswith(prefix) for prefix in MALE_PREFIXES) or any(
+        first_token.startswith(prefix) for prefix in MALE_PREFIXES
+    ):
+        return "Laki-laki"
+
+    if any(first_tokens.startswith(prefix) for prefix in FEMALE_PREFIXES) or any(
+        first_token.startswith(prefix) for prefix in FEMALE_PREFIXES
+    ):
+        return "Perempuan"
+
     # Check for feminine indicators
     for indicator in FEMININE_INDICATORS:
         if name.endswith(indicator):
