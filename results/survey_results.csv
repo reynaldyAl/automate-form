@@ -1,0 +1,51 @@
+nama,angkatan,program_studi,jenis_kelamin,profile_assigned,response_style,perfectionism_score,perfectionism_max,social_support_score,social_support_max,burnout_score,burnout_max,burnout_level,proposal_pressure_tendency,is_consistent,status
+ANNIZA MAGHFIRA PUTRI,2022,BK,Perempuan,supported_high_perfectionism_no_burnout,decisive,55,60,41,48,31,60,Moderate,0.45,True,success
+ALYA,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,decisive,53,60,45,48,31,60,Moderate,0.45,True,success
+NINDA AULIA,2023,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,32,60,45,48,21,60,Low,0.25,True,success
+LIAN TIARNI,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,balanced,48,60,45,48,30,60,Moderate,0.45,True,success
+HUSNUL KHATIMA,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,27,60,41,48,20,60,Low,0.25,True,success
+ERIN GRASIA PERABU,2022,BK,Perempuan,supported_high_perfectionism_no_burnout,cautious,46,60,40,48,35,60,Moderate,0.45,True,success
+NURUL ILMA,2023,Bahasa Indonesia,Perempuan,moderate_mixed,mixed,38,60,27,48,33,60,Moderate,0.5,True,success
+SRI OLIVIA SIGA,2023,BK,Perempuan,unsupported_high_perfectionism_burnout,mixed,51,60,17,48,54,60,High,0.85,True,success
+ZAHRA INTAN AZURAH,2023,BK,Perempuan,moderate_mixed,balanced,37,60,30,48,39,60,Moderate,0.5,True,success
+SUCI RAHMADANI,2023,BK,Perempuan,moderate_mixed,balanced,39,60,30,48,35,60,Moderate,0.5,True,success
+I PUTU ANDIKA SAPUTRA,2022,BK,Laki-laki,supported_low_perfectionism_no_burnout,mixed,25,60,38,48,19,60,Low,0.25,True,success
+ROSSA NUR RAMADHANI,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,38,60,43,48,24,60,Low,0.25,True,success
+SANDI AULYA,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,cautious,50,60,40,48,33,60,Moderate,0.45,True,success
+TIOSAFIOLA LUMBA,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,balanced,53,60,38,48,26,60,Low,0.45,True,success
+FITRAH ANGGRAINI,2022,Bahasa Indonesia,Perempuan,supported_high_perfectionism_no_burnout,cautious,47,60,37,48,30,60,Moderate,0.45,True,success
+UFARA DZIKRI,2023,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,35,60,45,48,21,60,Low,0.25,True,success
+ARIFAH PANGESTUTI,2023,BK,Perempuan,unsupported_high_perfectionism_burnout,balanced,47,60,17,48,54,60,High,0.85,True,success
+LIDIA AMANDA PUTRI,2023,Bahasa Indonesia,Perempuan,moderate_mixed,decisive,48,60,40,48,35,60,Moderate,0.5,True,success
+FIKRIAWAN S. KUNTUAMAS,2023,BK,Perempuan,moderate_mixed,mixed,42,60,38,48,41,60,High,0.5,True,success
+ORIELDI HENOKH,2022,BK,Perempuan,supported_high_perfectionism_no_burnout,mixed,49,60,41,48,27,60,Low,0.45,True,success
+SOFYA YUNITA,2023,Bahasa Indonesia,Perempuan,supported_low_perfectionism_no_burnout,balanced,28,60,44,48,20,60,Low,0.25,True,success
+MOH. SITS AFRAYN,2023,Bahasa Indonesia,Laki-laki,moderate_mixed,mixed,38,60,28,48,28,60,Moderate,0.5,True,success
+MOH. AWIL LEPA,2023,Bahasa Indonesia,Laki-laki,supported_high_perfectionism_no_burnout,mixed,49,60,40,48,25,60,Low,0.45,True,success
+DELMA LO'ONU,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,decisive,57,60,42,48,24,60,Low,0.45,True,success
+NUR AFIANITA,2023,BK,Perempuan,unsupported_high_perfectionism_burnout,balanced,53,60,23,48,52,60,High,0.85,True,success
+APRILIA ANANDA,2022,BK,Perempuan,unsupported_high_perfectionism_burnout,decisive,54,60,27,48,56,60,High,0.85,True,success
+SITI MUSDALIFAH ABD. GANI,2023,BK,Perempuan,supported_low_perfectionism_no_burnout,mixed,35,60,45,48,20,60,Low,0.25,True,success
+MAWADDAH WARAHMAH,2023,BK,Perempuan,supported_low_perfectionism_no_burnout,mixed,35,60,40,48,19,60,Low,0.25,True,success
+SAFILA,2022,BK,Perempuan,unsupported_high_perfectionism_burnout,decisive,57,60,22,48,58,60,High,0.85,True,success
+NUHFATUL TASYA,2023,BK,Perempuan,moderate_mixed,balanced,38,60,31,48,32,60,Moderate,0.5,True,success
+HILDA SAFITRI,2023,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,33,60,42,48,23,60,Low,0.25,True,success
+INGGRID NATASIA LANDA,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,balanced,25,60,38,48,21,60,Low,0.25,True,success
+NUR AISYAH,2023,BK,Perempuan,unsupported_high_perfectionism_burnout,balanced,51,60,22,48,52,60,High,0.85,True,success
+INDRI RUSTANTINA,2023,BK,Perempuan,moderate_mixed,cautious,39,60,32,48,40,60,High,0.5,True,success
+KOMANG DEVI TRIANA,2023,BK,Laki-laki,unsupported_high_perfectionism_burnout,decisive,56,60,22,48,57,60,High,0.85,True,success
+MUFTIAH,2023,BK,Perempuan,moderate_mixed,cautious,36,60,29,48,39,60,Moderate,0.5,True,success
+NURUL FADILLAH M. WADJI,2023,Bahasa Indonesia,Perempuan,moderate_mixed,decisive,49,60,39,48,30,60,Moderate,0.5,True,success
+NURHILMA DWI ANNISA,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,balanced,26,60,38,48,17,60,Low,0.25,True,success
+SALMA AUDYNA,2022,Bahasa Indonesia,Perempuan,unsupported_high_perfectionism_burnout,mixed,49,60,17,48,54,60,High,0.85,True,success
+MARCELINO,2023,BK,Perempuan,supported_high_perfectionism_no_burnout,decisive,54,60,42,48,24,60,Low,0.45,True,success
+LUTHFIAH,2022,BK,Perempuan,supported_high_perfectionism_no_burnout,mixed,56,60,41,48,33,60,Moderate,0.45,True,success
+WINDI INDRIANI,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,mixed,27,60,45,48,21,60,Low,0.25,True,success
+MOH. AMIRUL,2022,Bahasa Indonesia,Laki-laki,moderate_mixed,balanced,36,60,31,48,35,60,Moderate,0.5,True,success
+DIAS MUSFIRA,2022,Bahasa Indonesia,Perempuan,moderate_mixed,balanced,41,60,34,48,37,60,Moderate,0.5,True,success
+AYU DIAN SASMITA,2022,BK,Perempuan,unsupported_high_perfectionism_burnout,cautious,50,60,25,48,47,60,High,0.85,True,success
+MOH. DIKY SAPUTRA,2022,Bahasa Indonesia,Laki-laki,supported_high_perfectionism_no_burnout,decisive,55,60,42,48,26,60,Low,0.45,True,success
+NI KADEK CHINTIA DWI ANTARI,2022,BK,Perempuan,supported_high_perfectionism_no_burnout,mixed,47,60,41,48,37,60,Moderate,0.45,True,success
+DELLA SAFITRI,2022,BK,Perempuan,supported_low_perfectionism_no_burnout,decisive,26,60,44,48,21,60,Low,0.25,True,success
+ARMIANTI,2023,BK,Perempuan,unsupported_high_perfectionism_burnout,decisive,54,60,17,48,52,60,High,0.85,True,success
+HADRIS MAULIDIN,2022,BK,Laki-laki,supported_high_perfectionism_no_burnout,decisive,56,60,43,48,36,60,Moderate,0.45,True,success
