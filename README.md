@@ -51,6 +51,11 @@ Pastikan file [\.env](.env) berisi minimal:
 	NUM_SUBMISSIONS=50
 	BROWSER_HEADLESS=False
 	DRY_RUN=True
+	TARGET_CONSISTENCY_MIN=0.90
+	TARGET_CONSISTENCY_MAX=0.95
+	OUTLIER_RATE=0.08
+	CONTRADICTORY_RATE=0.03
+	STRAIGHTLINE_RATE=0.04
 
 Penjelasan:
 - FORM_URL: link Google Form target.
@@ -58,6 +63,10 @@ Penjelasan:
 - NUM_SUBMISSIONS: jumlah responden yang dijalankan.
 - BROWSER_HEADLESS: True untuk tanpa UI browser, False untuk terlihat.
 - DRY_RUN: True untuk isi tanpa klik submit, False untuk submit sungguhan.
+- TARGET_CONSISTENCY_MIN/MAX: target rasio konsisten akhir dataset.
+- OUTLIER_RATE: proporsi total outlier terkontrol.
+- CONTRADICTORY_RATE: proporsi outlier pola kontradiktif.
+- STRAIGHTLINE_RATE: proporsi outlier pola straight-line ringan.
 
 ## Command Terminal Yang Dipakai
 
@@ -108,6 +117,7 @@ Kolom penting:
 - social_support_score
 - burnout_score
 - burnout_level
+- outlier_type
 - is_consistent
 - status
 
