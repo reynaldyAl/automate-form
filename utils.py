@@ -1,4 +1,5 @@
 import random
+import os
 import pandas as pd
 from config import PROGRAMS
 
@@ -66,20 +67,73 @@ def detect_gender_from_name(name: str) -> str:
     return random.choice(["Perempuan", "Laki-laki"])
 
 
-def load_student_names(csv_file: str, num_submissions: int) -> list:
+def _read_used_names(used_names_file: str) -> set:
+    if not used_names_file or not os.path.exists(used_names_file):
+        return set()
+
+    used = set()
+    try:
+        with open(used_names_file, "r", encoding="utf-8") as f:
+            for line in f:
+                name = line.strip()
+                if name:
+                    used.add(name)
+    except Exception as e:
+        print(f"Warning: Could not read used names file: {e}")
+    return used
+
+
+def _append_used_names(used_names_file: str, names: list):
+    if not used_names_file or not names:
+        return
+
+    try:
+        folder = os.path.dirname(used_names_file)
+        if folder:
+            os.makedirs(folder, exist_ok=True)
+        with open(used_names_file, "a", encoding="utf-8") as f:
+            for name in names:
+                f.write(f"{name}\n")
+    except Exception as e:
+        print(f"Warning: Could not update used names file: {e}")
+
+
+def load_student_names(
+    csv_file: str,
+    num_submissions: int,
+    used_names_file: str = None,
+    reset_used_names: bool = False,
+) -> list:
     """Load and sample student names from CSV"""
     try:
         df = pd.read_csv(csv_file, header=None, names=['nama'])
         # Remove duplicates and NaN values
-        df = df.dropna().drop_duplicates()
-        
-        # Sample the requested number
-        if len(df) >= num_submissions:
-            names = df['nama'].sample(n=num_submissions, random_state=42).tolist()
-        else:
-            print(f"Warning: Only {len(df)} unique names available, using all")
-            names = df['nama'].tolist()
-        
+        df = df.dropna()
+        df['nama'] = df['nama'].astype(str).str.strip()
+        df = df[df['nama'] != ""].drop_duplicates(subset=['nama'])
+
+        if reset_used_names and used_names_file and os.path.exists(used_names_file):
+            os.remove(used_names_file)
+            print(f"Used names reset: {used_names_file}")
+
+        used_names = _read_used_names(used_names_file) if used_names_file else set()
+        all_names = df['nama'].tolist()
+        available_names = [name for name in all_names if name not in used_names]
+
+        if not available_names:
+            print("Warning: No new names available (all names already used).")
+            return []
+
+        take_count = min(num_submissions, len(available_names))
+        if take_count < num_submissions:
+            print(
+                f"Warning: Only {take_count} unused names available, "
+                f"requested {num_submissions}."
+            )
+
+        names = random.sample(available_names, take_count)
+        _append_used_names(used_names_file, names)
+
         return names
     except Exception as e:
         print(f"Error loading CSV: {e}")

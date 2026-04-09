@@ -1,6 +1,14 @@
 import time
 import os
-from config import FORM_URL, CSV_FILE, NUM_SUBMISSIONS, BROWSER_HEADLESS, DRY_RUN
+from config import (
+    FORM_URL,
+    CSV_FILE,
+    NUM_SUBMISSIONS,
+    BROWSER_HEADLESS,
+    DRY_RUN,
+    USED_NAMES_FILE,
+    RESET_USED_NAMES,
+)
 from utils import load_student_names, get_demographic_for_name, assign_cohort_distribution
 from data_generator import generate_all_responses
 from form_filler import GoogleFormFiller
@@ -37,7 +45,12 @@ def main():
     
     # Step 1: Load student names
     print("\n[Step 1] Loading student names from CSV...")
-    student_names = load_student_names(CSV_FILE, requested_submissions)
+    student_names = load_student_names(
+        CSV_FILE,
+        requested_submissions,
+        used_names_file=USED_NAMES_FILE,
+        reset_used_names=RESET_USED_NAMES,
+    )
     
     if not student_names:
         print("Failed to load student names. Exiting.")
