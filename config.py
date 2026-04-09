@@ -9,6 +9,8 @@ CSV_FILE = os.getenv("CSV_FILE", "data_nama_mahasiswa_sastra.csv")
 NUM_SUBMISSIONS = int(os.getenv("NUM_SUBMISSIONS", "120"))
 BROWSER_HEADLESS = os.getenv("BROWSER_HEADLESS", "False").lower() == "true"
 DRY_RUN = os.getenv("DRY_RUN", "False").lower() == "true"
+USED_NAMES_FILE = os.getenv("USED_NAMES_FILE", "results/used_names.txt")
+RESET_USED_NAMES = os.getenv("RESET_USED_NAMES", "False").lower() == "true"
 
 # Demographics
 COHORTS = ["2023", "2022"]
