@@ -94,3 +94,17 @@ PROFILE_SCORE_RANGES = {
         "burnout_score": (28, 45),            # Moderate
     }
 }
+
+# Realism controls for a single analyzable output dataset.
+# Keep consistency high but not perfect, with a small controlled outlier portion.
+TARGET_CONSISTENCY_MIN = float(os.getenv("TARGET_CONSISTENCY_MIN", "0.90"))
+TARGET_CONSISTENCY_MAX = float(os.getenv("TARGET_CONSISTENCY_MAX", "0.95"))
+OUTLIER_RATE = float(os.getenv("OUTLIER_RATE", "0.08"))
+CONTRADICTORY_RATE = float(os.getenv("CONTRADICTORY_RATE", "0.03"))
+STRAIGHTLINE_RATE = float(os.getenv("STRAIGHTLINE_RATE", "0.04"))
+
+# Burnout level mix target for synthetic data.
+# Kept close to the real-data pattern: mostly Moderate, with Low still common and High limited.
+BURNOUT_LEVEL_TARGET_LOW = float(os.getenv("BURNOUT_LEVEL_TARGET_LOW", "0.28"))
+BURNOUT_LEVEL_TARGET_MODERATE = float(os.getenv("BURNOUT_LEVEL_TARGET_MODERATE", "0.57"))
+BURNOUT_LEVEL_TARGET_HIGH = float(os.getenv("BURNOUT_LEVEL_TARGET_HIGH", "0.15"))

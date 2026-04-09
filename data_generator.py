@@ -6,6 +6,12 @@ from config import (
     BURNOUT_QUESTIONS_COUNT,
     SCORE_MAPPING,
     PROFILE_SCORE_RANGES,
+    OUTLIER_RATE,
+    CONTRADICTORY_RATE,
+    STRAIGHTLINE_RATE,
+    BURNOUT_LEVEL_TARGET_LOW,
+    BURNOUT_LEVEL_TARGET_MODERATE,
+    BURNOUT_LEVEL_TARGET_HIGH,
 )
 
 
@@ -25,6 +31,253 @@ def _is_consistent_with_profile(profile: str, perf_score: int, social_score: int
     social_ok = ranges["social_support_score"][0] <= social_score <= ranges["social_support_score"][1]
     burnout_ok = ranges["burnout_score"][0] <= burnout_score <= ranges["burnout_score"][1]
     return perf_ok and social_ok and burnout_ok
+
+
+LIKERT_ASC = ["STS", "TS", "S", "SS"]
+
+
+def _clamp_idx(index: int) -> int:
+    return max(0, min(len(LIKERT_ASC) - 1, index))
+
+
+def _shift_answer(answer: str, delta: int) -> str:
+    try:
+        idx = LIKERT_ASC.index(answer)
+    except ValueError:
+        idx = 1
+    return LIKERT_ASC[_clamp_idx(idx + delta)]
+
+
+def _score_bundle(response: dict) -> tuple:
+    return (
+        _score_answers(response["perfectionism"]),
+        _score_answers(response["social_support"]),
+        _score_answers(response["burnout"]),
+    )
+
+
+def _mark_outlier(response: dict, outlier_type: str):
+    response["outlier_type"] = outlier_type
+
+
+def _burnout_level_from_score(score: int) -> str:
+    if score >= 40:
+        return "High"
+    if score >= 28:
+        return "Moderate"
+    return "Low"
+
+
+def _score_within_profile(profile: str, burnout_score: int) -> bool:
+    ranges = PROFILE_SCORE_RANGES.get(profile)
+    if not ranges:
+        return False
+    return ranges["burnout_score"][0] <= burnout_score <= ranges["burnout_score"][1]
+
+
+def _target_burnout_counts(total: int) -> dict:
+    raw = {
+        "Low": total * BURNOUT_LEVEL_TARGET_LOW,
+        "Moderate": total * BURNOUT_LEVEL_TARGET_MODERATE,
+        "High": total * BURNOUT_LEVEL_TARGET_HIGH,
+    }
+    counts = {k: int(raw[k]) for k in raw}
+    remaining = total - sum(counts.values())
+    order = sorted(raw.keys(), key=lambda k: raw[k] - int(raw[k]), reverse=True)
+    for i in range(remaining):
+        counts[order[i % len(order)]] += 1
+    return counts
+
+
+def _nudge_burnout_score(response: dict, direction: str, max_steps: int = 4):
+    # Nudge score up/down with small random edits to keep item-level variability.
+    if direction not in {"up", "down"}:
+        return
+    delta = 1 if direction == "up" else -1
+    for _ in range(max_steps):
+        pos = random.randrange(len(response["burnout"]))
+        original = response["burnout"][pos]
+        updated = _shift_answer(original, delta)
+        response["burnout"][pos] = updated
+
+        if not _score_within_profile(response["profile"], _score_answers(response["burnout"])):
+            response["burnout"][pos] = original
+            continue
+
+
+def _ensure_non_uniform_burnout(response: dict):
+    # Prevent respondents from having exactly one repeated option for all burnout items.
+    if len(set(response["burnout"])) > 1:
+        return
+    anchor = response["burnout"][0]
+    positions = random.sample(range(len(response["burnout"])), k=2)
+    response["burnout"][positions[0]] = _shift_answer(anchor, 1)
+    response["burnout"][positions[1]] = _shift_answer(anchor, -1)
+
+
+def _tune_burnout_mix(all_responses: list):
+    total = len(all_responses)
+    if total == 0:
+        return
+
+    target = _target_burnout_counts(total)
+
+    # Keep outlier rows untouched for their intended behavior.
+    adjustable_idx = [
+        idx for idx, row in enumerate(all_responses)
+        if row.get("outlier_type", "none") == "none"
+    ]
+
+    for _ in range(220):
+        level_by_idx = {}
+        counts = {"Low": 0, "Moderate": 0, "High": 0}
+
+        for idx, row in enumerate(all_responses):
+            score = _score_answers(row["burnout"])
+            lvl = _burnout_level_from_score(score)
+            level_by_idx[idx] = lvl
+            counts[lvl] += 1
+
+        deficits = [lvl for lvl in ["Low", "Moderate", "High"] if counts[lvl] < target[lvl]]
+        surpluses = [lvl for lvl in ["Low", "Moderate", "High"] if counts[lvl] > target[lvl]]
+        if not deficits or not surpluses:
+            break
+
+        deficit = deficits[0]
+        surplus = surpluses[0]
+
+        candidates = [
+            idx for idx in adjustable_idx
+            if level_by_idx[idx] == surplus
+        ]
+        if not candidates:
+            break
+
+        chosen_idx = random.choice(candidates)
+        chosen = all_responses[chosen_idx]
+
+        backup_burnout = chosen["burnout"][:]
+        if deficit == "High":
+            _nudge_burnout_score(chosen, "up", max_steps=3)
+        elif deficit == "Low":
+            _nudge_burnout_score(chosen, "down", max_steps=3)
+        else:
+            if surplus == "Low":
+                _nudge_burnout_score(chosen, "up", max_steps=2)
+            elif surplus == "High":
+                _nudge_burnout_score(chosen, "down", max_steps=2)
+
+        after = _score_answers(chosen["burnout"])
+        if not _score_within_profile(chosen["profile"], after):
+            # Revert if the adjustment pushed the row outside its profile range.
+            chosen["burnout"] = backup_burnout
+
+
+    for row in all_responses:
+        _ensure_non_uniform_burnout(row)
+
+
+def _apply_contradictory_pattern(response: dict):
+    # Contradictory: social support appears high while burnout also appears high.
+    response["social_support"] = [random.choice(["S", "SS", "S"]) for _ in response["social_support"]]
+    response["burnout"] = [random.choice(["S", "SS", "S", "TS"]) for _ in response["burnout"]]
+
+
+def _apply_straightline_pattern(response: dict):
+    # Straight-line ringan: mostly one option on one scale with small local variation.
+    target_scale = random.choice(["perfectionism", "social_support", "burnout"])
+    anchor = random.choice(["TS", "S"])
+    updated = []
+    for _ in response[target_scale]:
+        if random.random() < 0.15:
+            updated.append(_shift_answer(anchor, random.choice([-1, 1])))
+        else:
+            updated.append(anchor)
+    response[target_scale] = updated
+
+
+def _apply_mild_outlier_pattern(response: dict):
+    # Mild outlier: small contradictory nudges across scales.
+    all_positions = []
+    for scale_name in ["perfectionism", "social_support", "burnout"]:
+        for idx in range(len(response[scale_name])):
+            all_positions.append((scale_name, idx))
+
+    random.shuffle(all_positions)
+    changes = random.randint(6, 10)
+    for scale_name, idx in all_positions[:changes]:
+        delta = random.choice([-2, -1, 1, 2])
+        response[scale_name][idx] = _shift_answer(response[scale_name][idx], delta)
+
+
+def _force_inconsistent_with_profile(response: dict):
+    # Force inconsistency via social support, because profile ranges are clearly separated here.
+    profile = response["profile"]
+    if profile == "unsupported_high_perfectionism_burnout":
+        # Expected low support; push to high support.
+        response["social_support"] = [random.choice(["S", "SS", "SS"]) for _ in response["social_support"]]
+    else:
+        # Expected medium/high support; push to low support.
+        response["social_support"] = [random.choice(["TS", "STS", "TS"]) for _ in response["social_support"]]
+
+
+def _is_response_consistent(response: dict) -> bool:
+    perf_score, social_score, burnout_score = _score_bundle(response)
+    return _is_consistent_with_profile(response["profile"], perf_score, social_score, burnout_score)
+
+
+def _apply_controlled_outliers(all_responses: list):
+    total = len(all_responses)
+    if total == 0:
+        return
+
+    for response in all_responses:
+        response["outlier_type"] = "none"
+
+    total_outliers = max(1, round(total * OUTLIER_RATE))
+    contradictory_count = round(total * CONTRADICTORY_RATE)
+    straightline_count = round(total * STRAIGHTLINE_RATE)
+
+    # Keep category counts feasible and non-overlapping.
+    if contradictory_count + straightline_count > total_outliers:
+        overflow = contradictory_count + straightline_count - total_outliers
+        reduce_straight = min(overflow, straightline_count)
+        straightline_count -= reduce_straight
+        overflow -= reduce_straight
+        contradictory_count = max(0, contradictory_count - overflow)
+
+    generic_count = max(0, total_outliers - contradictory_count - straightline_count)
+
+    indices = list(range(total))
+    random.shuffle(indices)
+
+    contradictory_idx = set(indices[:contradictory_count])
+    straightline_idx = set(indices[contradictory_count:contradictory_count + straightline_count])
+    generic_idx = set(indices[contradictory_count + straightline_count:contradictory_count + straightline_count + generic_count])
+
+    for idx in contradictory_idx:
+        response = all_responses[idx]
+        _apply_contradictory_pattern(response)
+        _force_inconsistent_with_profile(response)
+        _mark_outlier(response, "contradictory")
+
+    for idx in straightline_idx:
+        response = all_responses[idx]
+        _apply_straightline_pattern(response)
+        _force_inconsistent_with_profile(response)
+        _mark_outlier(response, "straightline")
+
+    for idx in generic_idx:
+        response = all_responses[idx]
+        _apply_mild_outlier_pattern(response)
+        _force_inconsistent_with_profile(response)
+        _mark_outlier(response, "general_outlier")
+
+    # Safety net: if a targeted outlier remains consistent, push once more.
+    for idx in (contradictory_idx | straightline_idx | generic_idx):
+        response = all_responses[idx]
+        if _is_response_consistent(response):
+            _force_inconsistent_with_profile(response)
 
 class ResponseGenerator:
     """Generate realistic survey responses based on student profiles"""
@@ -132,13 +385,13 @@ class ResponseGenerator:
 
         # Profile-specific anchoring to keep generated data aligned with intended groups.
         profile_shift = {
-            "supported_low_perfectionism_no_burnout": -0.10,
-            "supported_high_perfectionism_no_burnout": -0.08,
-            "unsupported_high_perfectionism_burnout": 0.14,
-            "moderate_mixed": 0.00,
+            "supported_low_perfectionism_no_burnout": -0.12,
+            "supported_high_perfectionism_no_burnout": -0.02,
+            "unsupported_high_perfectionism_burnout": 0.13,
+            "moderate_mixed": 0.05,
         }.get(self.profile_type, 0.0)
 
-        noise = random.uniform(-0.06, 0.06)
+        noise = random.uniform(-0.05, 0.05)
         return _clamp(base + profile_shift + noise)
     
     def generate_perfectionism_responses(self) -> list:
@@ -250,5 +503,8 @@ def generate_all_responses(num_students: int) -> list:
                 best_candidate = candidate
 
         all_responses.append(best_candidate)
+
+    _apply_controlled_outliers(all_responses)
+    _tune_burnout_mix(all_responses)
     
     return all_responses
