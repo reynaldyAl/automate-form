@@ -6,14 +6,38 @@ from data_generator import generate_all_responses
 from form_filler import GoogleFormFiller
 from result_analyzer import ResultAnalyzer
 
+
+def _get_requested_submissions(default_value: int) -> int:
+    """Get respondent count from user input with safe fallback."""
+    try:
+        raw = input(f"Jumlah responden (Enter = {default_value}): ").strip()
+    except EOFError:
+        return default_value
+
+    if not raw:
+        return default_value
+
+    try:
+        requested = int(raw)
+        if requested <= 0:
+            print(f"Input tidak valid, memakai default {default_value}.")
+            return default_value
+        return requested
+    except ValueError:
+        print(f"Input bukan angka, memakai default {default_value}.")
+        return default_value
+
+
 def main():
     print("=" * 60)
     print("FORM FILLER AUTOMATION - ACADEMIC BURNOUT SURVEY")
     print("=" * 60)
+
+    requested_submissions = _get_requested_submissions(NUM_SUBMISSIONS)
     
     # Step 1: Load student names
     print("\n[Step 1] Loading student names from CSV...")
-    student_names = load_student_names(CSV_FILE, NUM_SUBMISSIONS)
+    student_names = load_student_names(CSV_FILE, requested_submissions)
     
     if not student_names:
         print("Failed to load student names. Exiting.")
