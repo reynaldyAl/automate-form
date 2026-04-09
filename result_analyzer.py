@@ -1,7 +1,15 @@
 import csv
 import math
 import os
-from config import SCORE_MAPPING, PROFILE_SCORE_RANGES
+from config import (
+    SCORE_MAPPING,
+    PROFILE_SCORE_RANGES,
+    TARGET_CONSISTENCY_MIN,
+    TARGET_CONSISTENCY_MAX,
+    OUTLIER_RATE,
+    CONTRADICTORY_RATE,
+    STRAIGHTLINE_RATE,
+)
 
 
 class ResultAnalyzer:
@@ -42,12 +50,31 @@ class ResultAnalyzer:
             "burnout_max": 15 * 4,
             "burnout_level": burnout_level,
             "proposal_pressure_tendency": round(survey_responses.get('proposal_pressure_tendency', 0.5), 2),
+            "outlier_type": survey_responses.get('outlier_type', 'none'),
             "is_consistent": is_consistent,
             "status": status,
         }
+
+        result.update(self._expand_item_level_answers(survey_responses))
         
         self.results.append(result)
         return result
+
+    @staticmethod
+    def _expand_item_level_answers(survey_responses):
+        """Flatten all item-level answers into CSV-ready columns."""
+        expanded = {}
+
+        for index, answer in enumerate(survey_responses.get('perfectionism', []), 1):
+            expanded[f"perfectionism_{index}"] = answer
+
+        for index, answer in enumerate(survey_responses.get('social_support', []), 1):
+            expanded[f"social_support_{index}"] = answer
+
+        for index, answer in enumerate(survey_responses.get('burnout', []), 1):
+            expanded[f"burnout_{index}"] = answer
+
+        return expanded
     
     @staticmethod
     def _score_answers(answers):
@@ -123,10 +150,26 @@ class ResultAnalyzer:
         total = len(self.results)
         successful = sum(1 for r in self.results if r['status'] == 'success')
         consistent = sum(1 for r in self.results if r['is_consistent'])
+        outliers = [r for r in self.results if r.get('outlier_type', 'none') != 'none']
         
         print(f"\nTotal Responses: {total}")
         print(f"Successful Submissions: {successful} ({successful/total*100:.1f}%)")
         print(f"Consistent with Profile: {consistent} ({consistent/total*100:.1f}%)")
+        print(f"Outlier Rows: {len(outliers)} ({len(outliers)/total*100:.1f}%)")
+
+        target_min_pct = TARGET_CONSISTENCY_MIN * 100
+        target_max_pct = TARGET_CONSISTENCY_MAX * 100
+        actual_consistency_pct = consistent / total * 100
+        consistency_in_target = target_min_pct <= actual_consistency_pct <= target_max_pct
+        print(
+            f"Consistency Target Band: {target_min_pct:.1f}% - {target_max_pct:.1f}% "
+            f"({'OK' if consistency_in_target else 'OUTSIDE'})"
+        )
+
+        print("Outlier Target Rates")
+        print(f"  total outlier target: {OUTLIER_RATE*100:.1f}%")
+        print(f"  contradictory target: {CONTRADICTORY_RATE*100:.1f}%")
+        print(f"  straightline target: {STRAIGHTLINE_RATE*100:.1f}%")
 
         quality_rate = consistent / total * 100
         quality_label = "Excellent" if quality_rate >= 92 else "Good" if quality_rate >= 82 else "Needs Tuning"
@@ -183,6 +226,14 @@ class ResultAnalyzer:
             styles[style] = styles.get(style, 0) + 1
         for style, count in sorted(styles.items()):
             print(f"  {style}: {count} ({count/total*100:.1f}%)")
+
+        print("\nOUTLIER TYPE DISTRIBUTION")
+        outlier_types = {}
+        for r in self.results:
+            typ = r.get('outlier_type', 'none')
+            outlier_types[typ] = outlier_types.get(typ, 0) + 1
+        for typ, count in sorted(outlier_types.items()):
+            print(f"  {typ}: {count} ({count/total*100:.1f}%)")
         
         # Consistency per profile
         print("\nCONSISTENCY BY PROFILE")
